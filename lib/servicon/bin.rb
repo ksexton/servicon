@@ -25,6 +25,7 @@ class Servicon::Bin
         puts "servicon " + Servicon::VERSION
         return 0
       end
+    end
 
     begin
       opts.parse!(@args)
