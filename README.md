@@ -18,7 +18,9 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+require 'servicon'
+
+puts Servicon::Servicon.new("webserver").create
 
 ## Contributing
 
