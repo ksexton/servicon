@@ -1,6 +1,7 @@
 require "servicon/version"
-require 'paint'
-require 'digest'
+require "servicon/bin"
+require "paint"
+require "digest"
 
 module Servicon
 
