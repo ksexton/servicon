@@ -69,7 +69,11 @@ module Servicon
       return icon
     end
     
+
+class Servicon::NoCodeError < StandardError; end
+
   end
+
 
 
 end

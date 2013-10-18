@@ -43,10 +43,10 @@ class Servicon::Bin
 
     begin
       return_val = 0
-      i = Servicon.new(@args[0])
-      puts Servicon.new.create
+      i = Servicon::Servicon.new(@args[0])
+      puts i.create
       return return_val
-    rescue Servicon::NoCodeError
+    rescue Servicon::Servicon::NoCodeError
       puts "servicon: no file specified or specified file does not exist"
       puts "servicon: try 'servicon --help' for more information"
       return 1
