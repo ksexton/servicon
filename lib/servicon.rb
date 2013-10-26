@@ -5,75 +5,93 @@ require "digest"
 
 module Servicon
 
-  class Servicon
-    attr_accessor :key, :fingerprint, :identifier
+  class Icon
+    attr_accessor :fingerprint
     
-    def initialize(fingerprint)
+    def initialize(fingerprint, color = true, ascii = false)
+      @color = color
+      @ascii = ascii
       @fingerprint = fingerprint
-      @identifier = self.identifier
+      @uuid = self.uuid
     end
 
-    def identifier
-      identifier = Digest::MD5.hexdigest(@fingerprint).unpack('H*')[0].to_i(16)
+    def uuid
+      uuid = Digest::SHA1.hexdigest(@fingerprint).unpack('H*')[0].to_i(16)
     end
 
     def matrix
       line = Array.new
       identicon = Array.new
 
-      63.downto(0) do |i|
-        line << @identifier[i]
-        if (i % 8 == 0)
-          line << @identifier[i]
+      0.upto(63) do |i|
+        line << @uuid[i]
+        if line.count == 8
           identicon << line + line.reverse
           line = Array.new
         end
       end
+
       return identicon
     end
 
     def rgb
       color = Hash.new
-      color[:red] = (@identifier & 0xff)
-      color[:blue] = ((@identifier >> 8) & 0xff)
-      color[:green] = ((@identifier >> 16) & 0xff)
+      color[:red] = (@uuid & 0xff)
+      color[:blue] = ((@uuid >> 8) & 0xff)
+      color[:green] = ((@uuid >> 16) & 0xff)
       return color
     end
+
+    def ascii
+      character_group = [['#', ' '],
+                         ['-', '+'],
+                         ['_', '-'],
+                         ['[', ']'],
+                         ['\'', '"'],
+                         ['/', '\\'],]
+
+
+      group = character_group[(@uuid % character_group.length)]
+
+      return group
+    end
     
-    def color(matrix_line)
-      rgb = self.rgb
+    def display
+      draw_matrix(matrix)
+    end
 
-      red = rgb[:red]
-      green = rgb[:green]
-      blue = rgb[:blue]
-
+    def draw_matrix(matrix)
+      my_row = Array.new
+      
+      matrix.each do |row|
+         my_row << draw_row(row)
+      end
+      
+      return my_row.join
+    end
+    
+    def draw_row(matrix_row)
       line = Array.new
-      matrix_line.each do |character|
-        if character == 0
-          line << Paint[' ', nil, [red, green, blue]]
-        elsif character == 1
-          line << Paint[' ', nil, [red / 2, green / 2, blue / 2]]
-        end
+
+      matrix_row.each do |character|
+        line << draw_char(character)
       end
-      return line.join
+        
+      return line.join + "\n"
     end
-    
 
-    def create
-      matrix = self.matrix
-
-      icon = String.new
-      matrix.each do |line|
-        icon = icon + color(line) + "\n"
-      end
-      return icon
+    def draw_char(character)
+      rgb = [self.rgb[:red], self.rgb[:green], self.rgb[:blue]]
+      rgb.collect! { |n| n / 2 } if character == 1
+ 
+      @ascii ? char = self.ascii[character] : char = ' '
+      @ascii ? background = nil : background = rgb
+      (@ascii and @color) ? foreground = rgb : foreground = nil
+ 
+      Paint[char, foreground, background]
     end
-    
-
-class Servicon::NoCodeError < StandardError; end
-
   end
 
-
+  class Servicon::NoCodeError < StandardError; end    
 
 end
